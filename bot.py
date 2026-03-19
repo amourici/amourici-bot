@@ -2,21 +2,14 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import smtplib
 from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
 import os
 
 flask_app = Flask(__name__)
 CORS(flask_app, origins="*")
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET")
-
-@flask_app.route('/')
-def home():
-    return "✅ Bot AmourIci ONLINE"
 
 @flask_app.route('/send-checkin-email', methods=['POST'])
 def send_email():
@@ -26,44 +19,18 @@ def send_email():
             return jsonify({"error": "no"}), 403
 
         email_dest = data.get("email_dest", "")
-        appartamento = data.get("appartamento", "Appartamento")
 
-        pdf_filename = "studio_deluxe.pdf"
-
-        html = f"""
-        <html><body style="font-family:Arial;background:#f4f4f4;padding:20px;">
-        <div style="max-width:600px;margin:auto;background:white;border-radius:12px;">
-            <div style="background:#000;color:white;padding:25px;text-align:center;">
-                <h1>AMOUR IÇI</h1>
-            </div>
-            <div style="padding:30px;">
-                <h2>Ciao 👋</h2>
-                <p>Check-in completato!</p>
-                <p><strong>Appartamento:</strong> {appartamento}</p>
-                <h3>📎 PDF istruzioni in allegato</h3>
-            </div>
-        </div>
-        </body></html>
-        """
-
-        msg = MIMEMultipart("alternative")
+        msg = MIMEText("Test - Check-in completato!\n\nSe ricevi questa email, l'invio Gmail funziona. Il PDF arriverà nella versione finale.")
         msg["From"] = EMAIL_SENDER
         msg["To"] = email_dest
-        msg["Subject"] = f"Self Check-in - {appartamento} - Amour Içi"
-
-        msg.attach(MIMEText(html, "html"))
-
-        with open(pdf_filename, "rb") as f:
-            pdf_attachment = MIMEApplication(f.read(), _subtype="pdf")
-            pdf_attachment.add_header("Content-Disposition", "attachment", filename="Istruzioni_Self_Checkin.pdf")
-            msg.attach(pdf_attachment)
+        msg["Subject"] = "Test Self Check-in Amour Içi"
 
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
             server.login(EMAIL_SENDER, EMAIL_PASSWORD)
             server.sendmail(EMAIL_SENDER, email_dest, msg.as_string())
 
-        print(f"✅ EMAIL + PDF INVIATI a {email_dest}")
+        print("✅ EMAIL TEST INVIATA CON SUCCESSO!")
         return jsonify({"status": "ok"})
     except Exception as e:
         print("Errore:", e)
