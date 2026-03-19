@@ -6,9 +6,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import os
 
-# ================== CORS (per Base44) ==================
 flask_app = Flask(__name__)
-CORS(flask_app, resources={r"/*": {"origins": ["https://*.base44.app"]}})
+CORS(flask_app, origins="*")   # ← Questo risolve il blocco
 
 # ================== VARIABILI SICURE ==================
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -22,7 +21,6 @@ PDF_FILES = {
     "Studio Apartment": "studio_deluxe.pdf",
 }
 
-# Pagina di test
 @flask_app.route('/')
 def home():
     return "✅ Bot AmourIci ONLINE e pronto!"
@@ -51,7 +49,7 @@ def send_email():
                 <h2>Ciao 👋</h2>
                 <p>Check-in completato!</p>
                 <p><strong>Appartamento:</strong> {appartamento}</p>
-                <p><strong>Data:</strong> {{data}}</p>
+                <p><strong>Data:</strong> {data.get('data', '')}</p>
                 <h3>📎 PDF istruzioni in allegato</h3>
             </div>
         </div>
