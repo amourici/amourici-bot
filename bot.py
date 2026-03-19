@@ -11,16 +11,24 @@ EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET")
 
+@flask_app.route('/')
+def home():
+    return "✅ Bot AmourIci ONLINE"
+
 @flask_app.route('/send-checkin-email', methods=['POST'])
 def send_email():
     try:
         data = request.json
+        print("📥 Dati ricevuti:", data)
+
         if data.get("secret") != WEBHOOK_SECRET:
-            return jsonify({"error": "no"}), 403
+            print("❌ Secret sbagliato")
+            return jsonify({"status": "error"}), 403
 
         email_dest = data.get("email_dest", "")
+        print(f"📧 Provo a inviare a: {email_dest}")
 
-        msg = MIMEText("Test - Check-in completato!\n\nSe ricevi questa email, l'invio Gmail funziona. Il PDF arriverà nella versione finale.")
+        msg = MIMEText("✅ TEST EMAIL\n\nSe ricevi questa email, l'invio Gmail funziona perfettamente.\nIl PDF arriverà nella prossima versione.")
         msg["From"] = EMAIL_SENDER
         msg["To"] = email_dest
         msg["Subject"] = "Test Self Check-in Amour Içi"
@@ -30,10 +38,10 @@ def send_email():
             server.login(EMAIL_SENDER, EMAIL_PASSWORD)
             server.sendmail(EMAIL_SENDER, email_dest, msg.as_string())
 
-        print("✅ EMAIL TEST INVIATA CON SUCCESSO!")
+        print("🎉 EMAIL TEST INVIATA CON SUCCESSO!")
         return jsonify({"status": "ok"})
     except Exception as e:
-        print("Errore:", e)
+        print("💥 ERRORE:", str(e))
         return jsonify({"status": "error"}), 500
 
 if __name__ == "__main__":
