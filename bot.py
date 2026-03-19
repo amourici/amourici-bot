@@ -4,9 +4,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import os
-import threading   # ← questa era mancante!
 
-# ================== VARIABILI SICURE (da Railway) ==================
+# ================== VARIABILI SICURE ==================
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
@@ -19,6 +18,11 @@ PDF_FILES = {
 }
 
 flask_app = Flask(__name__)
+
+# Pagina di test (per vedere se è online)
+@flask_app.route('/')
+def home():
+    return "✅ Bot AmourIci ONLINE e pronto!"
 
 @flask_app.route('/send-checkin-email', methods=['POST'])
 def send_email():
@@ -35,22 +39,20 @@ def send_email():
             return jsonify({"error": "PDF non trovato"}), 404
 
         html = f"""
-        <html>
-        <body style="font-family:Arial; background:#f4f4f4; padding:20px;">
-        <div style="max-width:600px; margin:auto; background:white; border-radius:12px;">
-            <div style="background:#000; color:white; padding:25px; text-align:center;">
+        <html><body style="font-family:Arial;background:#f4f4f4;padding:20px;">
+        <div style="max-width:600px;margin:auto;background:white;border-radius:12px;">
+            <div style="background:#000;color:white;padding:25px;text-align:center;">
                 <h1>AMOUR IÇI</h1>
             </div>
             <div style="padding:30px;">
                 <h2>Ciao {{nome}} 👋</h2>
-                <p>Il tuo check-in è completato!</p>
+                <p>Check-in completato!</p>
                 <p><strong>Appartamento:</strong> {appartamento}</p>
                 <p><strong>Data:</strong> {{data}}</p>
-                <h3>📎 Nel messaggio trovi allegato il PDF con tutte le istruzioni</h3>
+                <h3>📎 PDF istruzioni in allegato</h3>
             </div>
         </div>
-        </body>
-        </html>
+        </body></html>
         """
 
         msg = MIMEMultipart("alternative")
@@ -76,10 +78,6 @@ def send_email():
         print("Errore:", e)
         return jsonify({"status": "error"}), 500
 
-def run_flask():
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     flask_app.run(host="0.0.0.0", port=port)
-
-if __name__ == "__main__":
-    threading.Thread(target=run_flask, daemon=True).start()
-    print("Bot pronto!")
