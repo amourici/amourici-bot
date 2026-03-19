@@ -7,38 +7,56 @@ from email.mime.application import MIMEApplication
 import os
 
 flask_app = Flask(__name__)
-CORS(flask_app, origins="*")   # ← Questo risolve il blocco
+CORS(flask_app, origins="*")
 
-# ================== VARIABILI SICURE ==================
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET")
 
-# ================== PDF ==================
 PDF_FILES = {
     "Deluxe Apartment": "studio_deluxe.pdf",
     "Studio Apartment": "studio_deluxe.pdf",
 }
 
+print("=== BOT AVVIATO ===")
+print("File presenti nella cartella:", os.listdir('.'))
+
 @flask_app.route('/')
 def home():
-    return "✅ Bot AmourIci ONLINE e pronto!"
+    return "✅ Bot AmourIci ONLINE"
 
 @flask_app.route('/send-checkin-email', methods=['POST'])
 def send_email():
     try:
         data = request.json
+        print("📥 Dati ricevuti:", data)
+
         if data.get("secret") != WEBHOOK_SECRET:
+            print("❌ Secret sbagliato!")
             return jsonify({"error": "no"}), 403
 
-        appartamento = data.get("appartamento", "")
+        appartamento = data.get("appartamento", "").strip()
         email_dest = data.get("email_dest", "")
 
+        print(f"🔍 Appartamento ricevuto: '{appartamento}'")
+        print(f"📧 Email: {email_dest}")
+
         pdf_filename = PDF_FILES.get(appartamento)
+        print(f"📄 PDF cercato: {pdf_filename}")
+
         if not pdf_filename:
+            print("❌ PDF non trovato nel dizionario!")
             return jsonify({"error": "PDF non trovato"}), 404
 
+        if not os.path.exists(pdf_filename):
+            print(f"❌ ERRORE: Il file {pdf_filename} NON ESISTE sul server!")
+            print("File presenti:", os.listdir('.'))
+            return jsonify({"error": "file non trovato"}), 404
+
+        print(f"✅ PDF TROVATO! Dimensione: {os.path.getsize(pdf_filename)} bytes")
+
+        # ... (resto del codice email invariato) ...
         html = f"""
         <html><body style="font-family:Arial;background:#f4f4f4;padding:20px;">
         <div style="max-width:600px;margin:auto;background:white;border-radius:12px;">
@@ -73,11 +91,11 @@ def send_email():
             server.login(EMAIL_SENDER, EMAIL_PASSWORD)
             server.sendmail(EMAIL_SENDER, email_dest, msg.as_string())
 
-        print(f"✅ Email + PDF inviati a {email_dest}")
+        print(f"🎉 EMAIL + PDF INVIATI CON SUCCESSO a {email_dest}")
         return jsonify({"status": "ok"})
     except Exception as e:
-        print("Errore:", e)
-        return jsonify({"status": "error"}), 500
+        print("💥 ERRORE GENERALE:", str(e))
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
