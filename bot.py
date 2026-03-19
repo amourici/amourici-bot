@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import os
+import threading   # ← questa era mancante!
 
 # ================== VARIABILI SICURE (da Railway) ==================
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -80,5 +81,5 @@ def run_flask():
     flask_app.run(host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
-    threading.Thread(target=run_flask, daemon=True).start()   # ← aggiungi questa riga se manca
+    threading.Thread(target=run_flask, daemon=True).start()
     print("Bot pronto!")
