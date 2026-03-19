@@ -4,13 +4,12 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import os
-import threading
 
-# ================== LE TUE IMPOSTAZIONI ==================
-TELEGRAM_TOKEN = "8717947118:AAFdf6hNDvPIEsLnhJjO1DwqxMhkm4gvPBc"
-EMAIL_SENDER = "04apartments@gmail.com"
-EMAIL_PASSWORD = "ilzm rpii lfda tkrs"
-WEBHOOK_SECRET = "amourici2026secret"
+# ================== VARIABILI SICURE (da Railway) ==================
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+EMAIL_SENDER = os.getenv("EMAIL_SENDER")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET")
 
 # ================== PDF ==================
 PDF_FILES = {
@@ -81,5 +80,5 @@ def run_flask():
     flask_app.run(host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
-    threading.Thread(target=run_flask, daemon=True).start()
+    threading.Thread(target=run_flask, daemon=True).start()   # ← aggiungi questa riga se manca
     print("Bot pronto!")
