@@ -1,9 +1,14 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import os
+
+# ================== CORS (per Base44) ==================
+flask_app = Flask(__name__)
+CORS(flask_app, resources={r"/*": {"origins": ["https://*.base44.app"]}})
 
 # ================== VARIABILI SICURE ==================
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -17,9 +22,7 @@ PDF_FILES = {
     "Studio Apartment": "studio_deluxe.pdf",
 }
 
-flask_app = Flask(__name__)
-
-# Pagina di test (per vedere se è online)
+# Pagina di test
 @flask_app.route('/')
 def home():
     return "✅ Bot AmourIci ONLINE e pronto!"
@@ -45,7 +48,7 @@ def send_email():
                 <h1>AMOUR IÇI</h1>
             </div>
             <div style="padding:30px;">
-                <h2>Ciao {{nome}} 👋</h2>
+                <h2>Ciao 👋</h2>
                 <p>Check-in completato!</p>
                 <p><strong>Appartamento:</strong> {appartamento}</p>
                 <p><strong>Data:</strong> {{data}}</p>
